@@ -21,15 +21,21 @@ class HomePage(QtWidgets.QWidget):
         self.home_title = QtWidgets.QLabel('Nou\'Gain')
         self.home_title.setAlignment(QtCore.Qt.AlignCenter)
         self.home_title.setFont(QtGui.QFont("Arial", 24, QtGui.QFont.Bold))
-        self.home_title.setStyleSheet("color: white;")
+        self.home_title.setStyleSheet("color: black;")
 
         self.home_button = QtWidgets.QPushButton('Connectez vous')
         self.home_button.setFont(QtGui.QFont("Arial", 14))
         self.home_button.setFixedSize(200, 50)
         self.home_button.setStyleSheet("background-color: #4CAF50; color: white; border-radius: 10px;")
 
+        self.create_account_button = QtWidgets.QPushButton('Créer un compte')
+        self.create_account_button.setFont(QtGui.QFont("Arial", 14))
+        self.create_account_button.setFixedSize(200, 50)
+        self.create_account_button.setStyleSheet("background-color: #2196F3; color: white; border-radius: 10px;")
+
         self.overlay_layout.addWidget(self.home_title)
         self.overlay_layout.addWidget(self.home_button)
+        self.overlay_layout.addWidget(self.create_account_button)
 
         self.overlay_widget = QtWidgets.QWidget(self)
         self.overlay_widget.setLayout(self.overlay_layout)

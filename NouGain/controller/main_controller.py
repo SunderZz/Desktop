@@ -1,5 +1,6 @@
 from datetime import date
 from PyQt5 import QtWidgets, QtCore
+import webbrowser
 from model.api_client import APIClient
 from view.home_page import HomePage
 from view.login_page import LoginPage
@@ -8,9 +9,16 @@ from view.add_product_page import AddProductPage
 from view.update_product_page import UpdateProductPage
 
 class MainController:
+    BASE_URL = "http://127.0.0.1:8000"
+
     def __init__(self):
-        self.api_client = APIClient(base_url="http://127.0.0.1:8000")
-        
+        self.api_client = APIClient(base_url=self.BASE_URL)
+        self.init_ui()
+        self.connect_signals()
+        self.main_window.show()
+        self.central_widget.setCurrentWidget(self.home_page)
+
+    def init_ui(self):
         self.main_window = QtWidgets.QMainWindow()
         self.central_widget = QtWidgets.QStackedWidget()
         self.main_window.setCentralWidget(self.central_widget)
@@ -27,12 +35,9 @@ class MainController:
         self.central_widget.addWidget(self.add_product_page)
         self.central_widget.addWidget(self.update_product_page)
 
-        self.connect_signals()
-        self.main_window.show()
-        self.central_widget.setCurrentWidget(self.home_page)
-
     def connect_signals(self):
         self.home_page.home_button.clicked.connect(self.show_login_page)
+        self.home_page.create_account_button.clicked.connect(self.open_create_account_link)  # Nouvelle ligne
         self.login_page.login_button.clicked.connect(self.login)
         self.product_page.add_product_button.clicked.connect(self.show_add_product_page)
         self.product_page.product_edit_requested.connect(self.show_update_product_page)
@@ -52,12 +57,18 @@ class MainController:
     def show_update_product_page(self, product_id):
         self.load_combobox_data()
         product_detail = self.api_client.get_product_by_id(product_id)
-        season_detail = self.api_client.get_season_with_product(product_id)
+        season_details = self.api_client.get_season_with_product(product_id)
         tva_detail = self.api_client.get_tva(product_detail['Id_tva'])
-        product_detail['Season_Name'] = season_detail.get('Name', 'N/A')
+        product_detail['Season_Name'] = self.get_season_name(season_details)
         product_detail['Tva_Name'] = tva_detail['Name']
         self.update_product_page.set_product_data(product_detail)
         self.central_widget.setCurrentWidget(self.update_product_page)
+
+    def get_season_name(self, season_details):
+        if isinstance(season_details, list):
+            season_names = [detail.get('Name', 'N/A') for detail in season_details if isinstance(detail, dict)]
+            return ', '.join(season_names) if season_names else 'N/A'
+        return season_details.get('Name', 'N/A') if isinstance(season_details, dict) else 'N/A'
 
     def show_product_page(self):
         self.central_widget.setCurrentWidget(self.product_page)
@@ -75,7 +86,7 @@ class MainController:
         password = self.login_page.password_input.text()
         response = self.api_client.login(mail, password)
         if 'Id_Users' in response:
-            user_name = f"{response['F_Name']} {response['Name']}"
+            user_name = f"{response['Name']} {response['F_Name']}"
             self.product_page.set_user_info(user_name)
             if self.api_client.id_producers:
                 self.central_widget.setCurrentWidget(self.product_page)
@@ -94,11 +105,7 @@ class MainController:
             product_detail = self.api_client.get_product_by_id(product_id)
             season_details = self.api_client.get_season_with_product(product_id)
             tva_detail = self.api_client.get_tva(product_detail['Id_tva'])
-            if isinstance(season_details, list):
-                season_names = [detail.get('Name', 'N/A') for detail in season_details if isinstance(detail, dict)]
-                product_detail['Season_Name'] = ', '.join(season_names) if season_names else 'N/A'
-            else:
-                product_detail['Season_Name'] = season_details.get('Name', 'N/A') if isinstance(season_details, dict) else 'N/A'
+            product_detail['Season_Name'] = self.get_season_name(season_details)
             product_detail['Tva_Name'] = tva_detail['Name']
             product_detail['Quantity'] = give['Quantity']
 
@@ -114,14 +121,13 @@ class MainController:
         unit_type = self.add_product_page.unit_input.currentText()
         unit_value = self.add_product_page.unit_value_input.value()
         season_name = self.add_product_page.season_input.currentText()
-        active = self.add_product_page.active_checkbox.isChecked()  
+        active = self.add_product_page.active_checkbox.isChecked()
 
         tva_details = self.api_client.get_tva_by_name(tva_name)
         tva_id = tva_details['Id_Tva']
 
         season_details = self.api_client.get_season_by_name(season_name)
         season_id = season_details['Id_Season']
-
 
         if not name or price == 0 or quantity == 0:
             QtWidgets.QMessageBox.warning(self.main_window, 'Validation Error', 'Please fill all required fields: Name, Price, Quantity.')
@@ -140,6 +146,9 @@ class MainController:
         }
         response = self.api_client.add_product(self.api_client.id_producers, product_data, unit_data, quantity, season_id)
         if 'Id_Product' in response:
+            product_id = response['Id_Product']
+            if self.add_product_page.image_file_path:
+                self.api_client.upload_produit_image(product_id, self.add_product_page.image_file_path)
             self.load_products()
             self.central_widget.setCurrentWidget(self.product_page)
         else:
@@ -151,7 +160,7 @@ class MainController:
             row = selected_items[0].row()
             product_id_item = self.product_page.product_table.item(row, 0)
             product_id = product_id_item.data(QtCore.Qt.UserRole)
-            
+
             name = self.update_product_page.name_input.text()
             price = self.update_product_page.price_input.value()
             tva_name = self.update_product_page.tva_input.currentText()
@@ -169,7 +178,7 @@ class MainController:
 
             season_details = self.api_client.get_season_by_name(season_name)
             season_id = season_details['Id_Season']
-            
+
             if not name or price == 0 or quantity == 0:
                 QtWidgets.QMessageBox.warning(self.main_window, 'Validation Error', 'Please fill all required fields: Name, Price, Quantity.')
                 return
@@ -187,6 +196,8 @@ class MainController:
             }
             response = self.api_client.update_product(product_id, product_data, season_id)
             if response:
+                if self.update_product_page.image_file_path:
+                    self.api_client.replace_produit_image(product_id, self.update_product_page.image_file_path)
                 self.load_products()
                 self.central_widget.setCurrentWidget(self.product_page)
             else:
@@ -203,6 +214,12 @@ class MainController:
     def clear_ui(self):
         self.product_page.product_table.setRowCount(0)
         self.product_page.set_user_info('')
+        self.clear_add_product_page()
+        self.clear_update_product_page()
+        self.login_page.login_input.clear()
+        self.login_page.password_input.clear()
+
+    def clear_add_product_page(self):
         self.add_product_page.name_input.clear()
         self.add_product_page.price_input.setValue(0)
         self.add_product_page.tva_input.setCurrentIndex(-1)
@@ -212,7 +229,9 @@ class MainController:
         self.add_product_page.unit_input.setCurrentIndex(-1)
         self.add_product_page.unit_value_input.setValue(0)
         self.add_product_page.season_input.setCurrentIndex(-1)
-        self.add_product_page.active_checkbox.setChecked(False)  
+        self.add_product_page.active_checkbox.setChecked(False)
+
+    def clear_update_product_page(self):
         self.update_product_page.name_input.clear()
         self.update_product_page.price_input.setValue(0)
         self.update_product_page.tva_input.setCurrentIndex(-1)
@@ -223,8 +242,6 @@ class MainController:
         self.update_product_page.unit_value_input.setValue(0)
         self.update_product_page.season_input.setCurrentIndex(-1)
         self.update_product_page.active_checkbox.setChecked(False)
-        self.login_page.login_input.clear()
-        self.login_page.password_input.clear()
 
     def load_combobox_data(self):
         tvas = self.api_client.get_all_tvas()
@@ -240,3 +257,24 @@ class MainController:
         for season in seasons:
             self.add_product_page.season_input.addItem(season['Name'], season['Id_Season'])
             self.update_product_page.season_input.addItem(season['Name'], season['Id_Season'])
+
+    def open_create_account_link(self):
+        url = "https://www.google.fr/"
+        webbrowser.open(url)
+
+    def show_update_product_page(self, product_id):
+        self.load_combobox_data()
+        product_detail = self.api_client.get_product_by_id(product_id)
+        season_details = self.api_client.get_season_with_product(product_id)
+        tva_detail = self.api_client.get_tva(product_detail['Id_tva'])
+        product_detail['Season_Name'] = self.get_season_name(season_details)
+        product_detail['Tva_Name'] = tva_detail['Name']
+
+        produit_image = self.api_client.get_produit_image(product_id)
+        if produit_image and 'lien_image' in produit_image:
+            image_url = produit_image['lien_image']
+            self.update_product_page.set_product_image(image_url)
+        
+        self.update_product_page.set_product_data(product_detail)
+        self.central_widget.setCurrentWidget(self.update_product_page)
+

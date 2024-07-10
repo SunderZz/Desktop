@@ -1,9 +1,10 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets
 
 class AddProductPage(QtWidgets.QWidget):
     def __init__(self):
         super(AddProductPage, self).__init__()
         self.init_ui()
+        self.image_file_path = None
 
     def init_ui(self):
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -43,6 +44,12 @@ class AddProductPage(QtWidgets.QWidget):
         self.active_label = QtWidgets.QLabel('Active:')
         self.active_checkbox = QtWidgets.QCheckBox()
 
+        # Ajouter des widgets pour la sélection de l'image
+        self.image_label = QtWidgets.QLabel('Image:')
+        self.image_button = QtWidgets.QPushButton('Select Image')
+        self.image_button.clicked.connect(self.select_image)
+        self.image_file_name = QtWidgets.QLabel('No file selected')
+
         self.add_button = QtWidgets.QPushButton('Add Product')
         self.back_button = QtWidgets.QPushButton('Back')
 
@@ -66,6 +73,16 @@ class AddProductPage(QtWidgets.QWidget):
         self.layout.addWidget(self.season_input)
         self.layout.addWidget(self.active_label)
         self.layout.addWidget(self.active_checkbox)
+        self.layout.addWidget(self.image_label)
+        self.layout.addWidget(self.image_button)
+        self.layout.addWidget(self.image_file_name)
         self.layout.addWidget(self.add_button)
         self.layout.addWidget(self.back_button)
         self.setLayout(self.layout)
+
+    def select_image(self):
+        options = QtWidgets.QFileDialog.Options()
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select Image", "", "Image Files (*.png *.jpg *.bmp)", options=options)
+        if file_path:
+            self.image_file_path = file_path
+            self.image_file_name.setText(file_path.split('/')[-1])

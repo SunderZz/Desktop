@@ -1,4 +1,7 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtGui import QPixmap
+import requests
+from io import BytesIO
 
 class ProductPage(QtWidgets.QWidget):
     product_edit_requested = QtCore.pyqtSignal(int)
@@ -31,10 +34,10 @@ class ProductPage(QtWidgets.QWidget):
 
         self.product_table_layout = QtWidgets.QVBoxLayout()
         self.product_table = QtWidgets.QTableWidget()
-        self.product_table.setColumnCount(9)
+        self.product_table.setColumnCount(10)
         self.product_table.setHorizontalHeaderLabels([
             "Produit", "Description", "Prix HT", "Actif", "Date de Création",
-            "Date de Modification", "Discount", "Saison", "Quantité"
+            "Date de Modification", "Discount", "Saison", "Quantité", "Image"
         ])
         self.product_table.setAlternatingRowColors(True)
         self.product_table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
@@ -52,7 +55,7 @@ class ProductPage(QtWidgets.QWidget):
         self.logout_button.clicked.connect(self.on_logout_button_clicked)
 
     def set_user_info(self, user_name):
-        self.user_info_label.setText(f"Bienvenue, {user_name}")
+        self.user_info_label.setText(f"Bienvenue {user_name}")
 
     def add_product_row(self, product):
         row_position = self.product_table.rowCount()
@@ -70,6 +73,20 @@ class ProductPage(QtWidgets.QWidget):
         self.product_table.setItem(row_position, 6, QtWidgets.QTableWidgetItem(str(product['Discount'] or '')))
         self.product_table.setItem(row_position, 7, QtWidgets.QTableWidgetItem(str(product.get('Season_Name', 'N/A'))))
         self.product_table.setItem(row_position, 8, QtWidgets.QTableWidgetItem(str(product['Quantity'])))
+
+        image_label = QtWidgets.QLabel()
+        if 'ImageURL' in product and product['ImageURL']:
+            self.set_image_from_url(image_label, product['ImageURL'])
+        self.product_table.setCellWidget(row_position, 9, image_label)
+
+    def set_image_from_url(self, label, url):
+        response = requests.get(url)
+        if response.status_code == 200:
+            pixmap = QPixmap()
+            pixmap.loadFromData(BytesIO(response.content).read())
+            label.setPixmap(pixmap)
+            label.setScaledContents(True)
+            label.setFixedSize(100, 100) 
 
     def on_product_double_clicked(self, row, column):
         product_id_item = self.product_table.item(row, 0)

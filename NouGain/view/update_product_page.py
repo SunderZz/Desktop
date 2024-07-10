@@ -1,9 +1,13 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtGui import QPixmap
+import requests
+from io import BytesIO
 
 class UpdateProductPage(QtWidgets.QWidget):
     def __init__(self):
         super(UpdateProductPage, self).__init__()
         self.init_ui()
+        self.image_file_path = None
 
     def init_ui(self):
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -47,6 +51,11 @@ class UpdateProductPage(QtWidgets.QWidget):
         self.date_activation_input = QtWidgets.QLineEdit()
         self.date_activation_input.setReadOnly(True)
 
+        self.image_label = QtWidgets.QLabel('Image:')
+        self.image_button = QtWidgets.QPushButton('Select Image')
+        self.image_button.clicked.connect(self.select_image)
+        self.image_file_name = QtWidgets.QLabel('No file selected')
+
         self.update_button = QtWidgets.QPushButton('Update Product')
         self.back_button = QtWidgets.QPushButton('Back')
 
@@ -72,9 +81,19 @@ class UpdateProductPage(QtWidgets.QWidget):
         self.layout.addWidget(self.active_checkbox)
         self.layout.addWidget(self.date_activation_label)
         self.layout.addWidget(self.date_activation_input)
+        self.layout.addWidget(self.image_label)
+        self.layout.addWidget(self.image_button)
+        self.layout.addWidget(self.image_file_name)
         self.layout.addWidget(self.update_button)
         self.layout.addWidget(self.back_button)
         self.setLayout(self.layout)
+
+    def select_image(self):
+        options = QtWidgets.QFileDialog.Options()
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select Image", "", "Image Files (*.png *.jpg *.bmp)", options=options)
+        if file_path:
+            self.image_file_path = file_path
+            self.image_file_name.setText(file_path.split('/')[-1])
 
     def set_product_data(self, product_data):
         self.name_input.setText(product_data['Name'])
@@ -87,3 +106,9 @@ class UpdateProductPage(QtWidgets.QWidget):
         self.season_input.setCurrentText(product_data['Season_Name'])
         self.active_checkbox.setChecked(product_data['Active'])
         self.date_activation_input.setText(product_data['Date_activation'])
+
+    def set_product_image(self, image_url):
+        response = requests.get(image_url)
+        pixmap = QPixmap()
+        pixmap.loadFromData(BytesIO(response.content).read())
+        self.image_display.setPixmap(pixmap)

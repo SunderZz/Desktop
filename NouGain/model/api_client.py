@@ -11,7 +11,7 @@ class APIClient:
     def login(self, mail: str, password: str) -> Dict[str, Any]:
         endpoint = f"{self.base_url}/users/login"
         response = requests.post(endpoint, params={"mail": mail, "password": password})
-        response.raise_for_status()  # Vérifie si la requête a réussi
+        response.raise_for_status() 
         data = response.json()
         self.id_users = data.get('Id_Users')
         if self.id_users:
@@ -111,10 +111,32 @@ class APIClient:
 
     def logout(self) -> int:
         endpoint = f"{self.base_url}/users/logout"
-        response = requests.post(endpoint, json={"user_id": self.id_users})
+        response = requests.delete(endpoint, json={"user_id": self.id_users})
         response.raise_for_status()
         if response.status_code == 200:
             self.id_users = None
             self.id_producers = None
             self.token = None
         return response.status_code
+
+    def get_produit_image(self, produit_image_id: int) -> Dict[str, Any]:
+        endpoint = f"{self.base_url}/produit_image/{produit_image_id}"
+        response = requests.get(endpoint)
+        response.raise_for_status()
+        return response.json()
+    
+    def upload_produit_image(self, produit_id: int, file_path: str) -> Dict[str, Any]:
+        endpoint = f"{self.base_url}/produit_image/upload/{produit_id}"
+        with open(file_path, 'rb') as file:
+            files = {'file': (file_path, file)}
+            response = requests.post(endpoint, files=files)
+            response.raise_for_status()
+            return response.json()
+        
+    def replace_produit_image(self, produit_id: int, file_path: str) -> Dict[str, Any]:
+        endpoint = f"{self.base_url}/produit_image/replace/{produit_id}"
+        with open(file_path, 'rb') as file:
+            files = {'file': (file_path, file)}
+            response = requests.put(endpoint, files=files)
+            response.raise_for_status()
+            return response.json()
