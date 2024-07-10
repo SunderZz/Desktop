@@ -37,7 +37,7 @@ class MainController:
 
     def connect_signals(self):
         self.home_page.home_button.clicked.connect(self.show_login_page)
-        self.home_page.create_account_button.clicked.connect(self.open_create_account_link)  # Nouvelle ligne
+        self.home_page.create_account_button.clicked.connect(self.open_create_account_link)
         self.login_page.login_button.clicked.connect(self.login)
         self.product_page.add_product_button.clicked.connect(self.show_add_product_page)
         self.product_page.product_edit_requested.connect(self.show_update_product_page)

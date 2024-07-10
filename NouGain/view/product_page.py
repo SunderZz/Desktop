@@ -26,7 +26,7 @@ class ProductPage(QtWidgets.QWidget):
         self.header_layout.addWidget(self.logout_button, alignment=QtCore.Qt.AlignRight)
 
         self.add_product_layout = QtWidgets.QHBoxLayout()
-        self.add_product_button = QtWidgets.QPushButton('Add Product')
+        self.add_product_button = QtWidgets.QPushButton('Ajouter un Produit')
         self.add_product_button.setFont(QtGui.QFont("Arial", 12))
         self.add_product_button.setFixedSize(150, 40)
         self.add_product_button.setStyleSheet("background-color: #4CAF50; color: white; border-radius: 10px;")

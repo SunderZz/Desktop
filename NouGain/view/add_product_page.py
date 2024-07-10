@@ -9,10 +9,10 @@ class AddProductPage(QtWidgets.QWidget):
     def init_ui(self):
         self.layout = QtWidgets.QVBoxLayout(self)
 
-        self.name_label = QtWidgets.QLabel('Name:')
+        self.name_label = QtWidgets.QLabel('Nom du Produit:')
         self.name_input = QtWidgets.QLineEdit()
 
-        self.price_label = QtWidgets.QLabel('Price:')
+        self.price_label = QtWidgets.QLabel('Prix:')
         self.price_input = QtWidgets.QDoubleSpinBox()
         self.price_input.setMaximum(1000000)
 
@@ -22,36 +22,35 @@ class AddProductPage(QtWidgets.QWidget):
         self.description_label = QtWidgets.QLabel('Description:')
         self.description_input = QtWidgets.QLineEdit()
 
-        self.discount_label = QtWidgets.QLabel('Discount:')
+        self.discount_label = QtWidgets.QLabel('Promotion:')
         self.discount_input = QtWidgets.QDoubleSpinBox()
         self.discount_input.setMaximum(100)
 
-        self.quantity_label = QtWidgets.QLabel('Quantity:')
+        self.quantity_label = QtWidgets.QLabel('Quantité:')
         self.quantity_input = QtWidgets.QSpinBox()
         self.quantity_input.setMaximum(10000)
 
-        self.unit_label = QtWidgets.QLabel('Unit Type:')
+        self.unit_label = QtWidgets.QLabel('Format de quantité:')
         self.unit_input = QtWidgets.QComboBox()
-        self.unit_input.addItems(["Kg", "Litre", "Gramme", "Unit"])
+        self.unit_input.addItems(["Kg", "Litre", "Gramme", "Unité"])
 
-        self.unit_value_label = QtWidgets.QLabel('Unit Value:')
+        self.unit_value_label = QtWidgets.QLabel('Format de quantité:')
         self.unit_value_input = QtWidgets.QDoubleSpinBox()
         self.unit_value_input.setMaximum(10000)
 
-        self.season_label = QtWidgets.QLabel('Season:')
+        self.season_label = QtWidgets.QLabel('Saison:')
         self.season_input = QtWidgets.QComboBox()
 
-        self.active_label = QtWidgets.QLabel('Active:')
+        self.active_label = QtWidgets.QLabel('Actif:')
         self.active_checkbox = QtWidgets.QCheckBox()
 
-        # Ajouter des widgets pour la sélection de l'image
         self.image_label = QtWidgets.QLabel('Image:')
-        self.image_button = QtWidgets.QPushButton('Select Image')
+        self.image_button = QtWidgets.QPushButton('Selectionner une Image')
         self.image_button.clicked.connect(self.select_image)
-        self.image_file_name = QtWidgets.QLabel('No file selected')
+        self.image_file_name = QtWidgets.QLabel('Aucune image selectionné')
 
-        self.add_button = QtWidgets.QPushButton('Add Product')
-        self.back_button = QtWidgets.QPushButton('Back')
+        self.add_button = QtWidgets.QPushButton('Ajouter le produit')
+        self.back_button = QtWidgets.QPushButton('Retour')
 
         self.layout.addWidget(self.name_label)
         self.layout.addWidget(self.name_input)

@@ -20,13 +20,13 @@ class LoginPage(QtWidgets.QWidget):
         self.overlay_layout = QtWidgets.QVBoxLayout()
         self.overlay_layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.login_label = QtWidgets.QLabel('Mail:')
+        self.login_label = QtWidgets.QLabel('E-Mail:')
         self.login_label.setStyleSheet("color: black;")
 
         self.login_input = QtWidgets.QLineEdit()
         self.login_input.setFixedSize(200, 30)  
 
-        self.password_label = QtWidgets.QLabel('Password:')
+        self.password_label = QtWidgets.QLabel('Mot de passe:')
         self.password_label.setStyleSheet("color: black;")
 
         self.password_input = QtWidgets.QLineEdit()
