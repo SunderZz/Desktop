@@ -1,0 +1,20 @@
+NouGain/
+│
+├── model/
+│   ├── api_client.py
+│   ├── __init__.py
+│
+├── view/
+│   ├── home_page.py
+│   ├── login_page.py
+│   ├── product_page.py
+│   ├── add_product_page.py
+│   ├── update_product_page.py
+│   ├── __init__.py
+│
+├── controller/
+│   ├── main_controller.py
+│   ├── __init__.py
+│
+├── main.py
+└── __init__.py
