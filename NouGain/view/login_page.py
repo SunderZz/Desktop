@@ -24,7 +24,7 @@ class LoginPage(QtWidgets.QWidget):
         self.login_label.setStyleSheet("color: black;")
 
         self.login_input = QtWidgets.QLineEdit()
-        self.login_input.setFixedSize(200, 30)  
+        self.login_input.setFixedSize(200, 30)
 
         self.password_label = QtWidgets.QLabel('Mot de passe:')
         self.password_label.setStyleSheet("color: black;")
@@ -71,9 +71,16 @@ class LoginPage(QtWidgets.QWidget):
             self.login_input.setStyleSheet('')
             self.password_input.setStyleSheet('')
         else:
-            self.error_label.setText('Incorrect password.')
+            self.error_label.setText('Adresse mail ou Mot de passe incorrect')
             self.login_input.setStyleSheet('border: 1px solid red')
             self.password_input.setStyleSheet('border: 1px solid red')
 
     def authenticate(self, email, password):
         return email == "user@example.com" and password == "password"
+
+    def reset_login_fields(self):
+        self.error_label.setText('')
+        self.login_input.setStyleSheet('')
+        self.password_input.setStyleSheet('')
+        self.login_input.clear()
+        self.password_input.clear()

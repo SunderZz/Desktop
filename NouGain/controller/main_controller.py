@@ -48,6 +48,7 @@ class MainController:
         self.update_product_page.back_button.clicked.connect(self.show_product_page)
 
     def show_login_page(self):
+        self.login_page.reset_login_fields()
         self.central_widget.setCurrentWidget(self.login_page)
 
     def show_add_product_page(self):
@@ -91,10 +92,10 @@ class MainController:
             if self.api_client.id_producers:
                 self.central_widget.setCurrentWidget(self.product_page)
                 self.load_products()
-            else:
-                print('Failed to retrieve producer ID')
         else:
-            print('Login failed:', response.get('detail', 'Unknown error'))
+            self.login_page.error_label.setText('Adresse mail ou Mot de passe incorrect')
+            self.login_page.login_input.setStyleSheet('border: 1px solid red')
+            self.login_page.password_input.setStyleSheet('border: 1px solid red')
 
     def load_products(self):
         give_products = self.api_client.get_give_products()
@@ -151,8 +152,7 @@ class MainController:
                 self.api_client.upload_produit_image(product_id, self.add_product_page.image_file_path)
             self.load_products()
             self.central_widget.setCurrentWidget(self.product_page)
-        else:
-            print('Failed to add product:', response.get('detail', 'Unknown error'))
+
 
     def update_product(self):
         selected_items = self.product_page.product_table.selectedItems()
@@ -194,22 +194,22 @@ class MainController:
                 "Discount": discount,
                 "Id_tva": tva_id
             }
-            response = self.api_client.update_product(product_id, product_data, season_id)
+            response = self.api_client.update_product(product_id, product_data, season_id, quantity)
             if response:
                 if self.update_product_page.image_file_path:
                     self.api_client.replace_produit_image(product_id, self.update_product_page.image_file_path)
                 self.load_products()
                 self.central_widget.setCurrentWidget(self.product_page)
-            else:
-                print('Failed to update product:', response.get('detail', 'Unknown error'))
+
+
 
     def logout(self):
         status_code = self.api_client.logout()
         if status_code == 200:
+            self.login_page.reset_login_fields()
             self.clear_ui()
             self.central_widget.setCurrentWidget(self.home_page)
-        else:
-            print('Failed to log out')
+
 
     def clear_ui(self):
         self.product_page.product_table.setRowCount(0)
@@ -269,6 +269,9 @@ class MainController:
         tva_detail = self.api_client.get_tva(product_detail['Id_tva'])
         product_detail['Season_Name'] = self.get_season_name(season_details)
         product_detail['Tva_Name'] = tva_detail['Name']
+
+        give_detail = self.api_client.get_give_by_id(product_id)
+        product_detail['Quantity'] = give_detail['Quantity']
 
         produit_image = self.api_client.get_produit_image(product_id)
         if produit_image and 'lien_image' in produit_image:

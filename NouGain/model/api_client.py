@@ -11,7 +11,6 @@ class APIClient:
     def login(self, mail: str, password: str) -> Dict[str, Any]:
         endpoint = f"{self.base_url}/users/login"
         response = requests.post(endpoint, params={"mail": mail, "password": password})
-        response.raise_for_status() 
         data = response.json()
         self.id_users = data.get('Id_Users')
         if self.id_users:
@@ -102,9 +101,9 @@ class APIClient:
         response.raise_for_status()
         return response.json()
 
-    def update_product(self, product_id: int, product_data: Dict[str, Any], season: int) -> Dict[str, Any]:
+    def update_product(self, product_id: int, product_data: Dict[str, Any], season: int, quantity: int) -> Dict[str, Any]:
         endpoint = f"{self.base_url}/products/{product_id}"
-        params = {"season": season}
+        params = {"season": season, "quantity": quantity}
         response = requests.put(endpoint, params=params, json=product_data)
         response.raise_for_status()
         return response.json()
@@ -140,3 +139,9 @@ class APIClient:
             response = requests.put(endpoint, files=files)
             response.raise_for_status()
             return response.json()
+        
+    def get_give_by_id(self, give_id: int) -> Dict[str, Any]:
+        endpoint = f"{self.base_url}/give/{give_id}"
+        response = requests.get(endpoint)
+        response.raise_for_status()
+        return response.json()
